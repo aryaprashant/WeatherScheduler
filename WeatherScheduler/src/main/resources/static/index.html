@@ -1,0 +1,89 @@
+<html>
+<head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <script type="text/javascript">
+
+        (function () {
+            $.ajax({
+                url: "/weatherinfo",
+                type: 'GET',
+                success: function (responsejson) {
+                    document.getElementById('show_min').innerHTML = responsejson["minimum"]["temp"].toFixed(2)
+                    document.getElementById('show_max').innerHTML = responsejson["maximum"]["temp"].toFixed(2)
+                    document.getElementById('show_min_time').innerHTML = (responsejson["minimum"]["date"]).slice(0, 19)
+                    document.getElementById('show_max_time').innerHTML = (responsejson["maximum"]["date"]).slice(0, 19)
+                }
+            });
+        })();
+        google.charts.load('current', {'packages': ['line']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+            var array = [];
+
+            $.ajax({
+                url: "/weatherhistory",
+                type: 'GET',
+                success: function (responsejson) {
+                    for (var i = 0, size = responsejson.length; i < size; i++) {
+                        var item = [];
+                        item[0] = new Date(responsejson[i]["timestamp"]).toISOString().slice(0, 19);
+                        item[1] = responsejson[i]["temp"];
+                        array.push(item)
+                    }
+                    var data = new google.visualization.DataTable();
+                    data.addColumn('string', 'Time');
+                    data.addColumn('number', 'Temperature (in °C)');
+                    data.addRows(array);
+
+                    var options = {
+                        chart: {
+                            title: 'Weather Details of Bangalore',
+                            subtitle: 'in celsius'
+                        },
+                        width: 1200,
+                        height: 600,
+                        axes: {
+                            x: {
+                                0: {side: 'bottom'}
+                            }
+                        },
+                        vAxis: {
+                            viewWindow: {
+                                max: 40,
+                                min: 10,
+                                count: 10
+                            }
+                        }
+                    };
+
+                    var chart = new google.charts.Line(document.getElementById('line_top_x'));
+
+                    chart.draw(data, google.charts.Line.convertOptions(options));
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+<h4> Minimum and Maximum temperature of Bangalore (in °C) </h4>
+
+<div>
+    <span>Min Temp:</span>
+    <span id="show_min"></span>&nbsp;&nbsp;
+    <span>TimeStamp:</span>
+    <span id="show_min_time"></span>
+</div>
+<div>
+    <span>Max Temp:</span>
+    <span id="show_max"></span>&nbsp;&nbsp;
+    <span>TimeStamp:</span>
+    <span id="show_max_time"></span>
+</div>
+</br>
+<h4> Graph representing change in temperature over time </h4>
+
+<div id="line_top_x"></div>
+</body>
+</html>

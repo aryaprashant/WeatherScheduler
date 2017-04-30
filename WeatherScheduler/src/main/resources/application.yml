@@ -1,0 +1,7 @@
+weather:
+  apiKey: 5d010a45c3aa5b0d7c56bc18486a3b2f
+
+spring:
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
